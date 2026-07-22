@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 0.1.1 - 2026-07-21
+
 - Added optional LinkedIn session-cookie support through `LINKEDIN_LI_AT` or `LINKEDIN_COOKIE`.
 - Made startup `.env` creation explicit and upgraded the generated defaults for first-run searches.
 - Added explicit runtime guidance for `401`, `403`, and auth-wall responses so users know when to add or refresh LinkedIn cookies.

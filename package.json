@@ -1,6 +1,6 @@
 {
   "name": "@false00/pi-linkedin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Production-focused LinkedIn job search tools for the Pi coding agent — resume-driven search, ranking, and public job detail extraction from LinkedIn guest job pages",
   "type": "module",
   "main": "dist/index.js",
