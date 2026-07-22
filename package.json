@@ -1,0 +1,78 @@
+{
+  "name": "@false00/pi-linkedin",
+  "version": "0.1.0",
+  "description": "Production-focused LinkedIn job search tools for the Pi coding agent — resume-driven search, ranking, and public job detail extraction from LinkedIn guest job pages",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "SECURITY.md",
+    "docs/COMPATIBILITY.md",
+    "docs/EXAMPLES.md",
+    "docs/TROUBLESHOOTING.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi-coding-agent",
+    "linkedin",
+    "linkedin-jobs",
+    "job-search",
+    "resume-matching",
+    "career",
+    "automation",
+    "false00"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "author": "false00 <jortega@curl.red>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/false00/pi-linkedin.git"
+  },
+  "homepage": "https://github.com/false00/pi-linkedin#readme",
+  "bugs": {
+    "url": "https://github.com/false00/pi-linkedin/issues"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "pi": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  },
+  "scripts": {
+    "test": "node tests/run.mjs",
+    "test:smoke": "node --test tests/smoke.test.mjs",
+    "test:runtime": "node --test tests/runtime.test.mjs",
+    "test:package": "node --test tests/package.test.mjs",
+    "lint": "echo 'no linter configured'",
+    "prepublishOnly": "npm test && npm pack --dry-run"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.49",
+    "cheerio": "^1.1.2"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  }
+}
