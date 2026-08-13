@@ -1,4 +1,6 @@
-import { load } from "cheerio";
+import { select } from "cheerio-select";
+import { getAttributeValue, getInnerHTML, getText } from "domutils";
+import { parseDocument } from "htmlparser2";
 import { ensureConfigTemplate, getEnvPath, loadConfig } from "./config.js";
 import { createToolError, emitProgress, throwIfAborted } from "./tool-runtime.js";
 
@@ -72,6 +74,30 @@ const STOPWORDS = new Set([
 
 function normalizeWhitespace(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim();
+}
+
+function parseHtml(html) {
+  return parseDocument(String(html ?? ""));
+}
+
+function selectNodes(root, selector) {
+  return select(selector, root);
+}
+
+function selectFirstNode(root, selector) {
+  return selectNodes(root, selector)[0] || null;
+}
+
+function getNodeAttribute(node, name) {
+  return node ? getAttributeValue(node, name) ?? "" : "";
+}
+
+function getNodeHtml(node) {
+  return node ? getInnerHTML(node) : "";
+}
+
+function getNodeText(node) {
+  return node ? getText(node) : "";
 }
 
 function hasText(value) {
@@ -188,7 +214,7 @@ function decodeHtmlEntities(value) {
     return "";
   }
 
-  return load(`<div>${String(value)}</div>`).text();
+  return getNodeText(parseHtml(`<div>${String(value)}</div>`));
 }
 
 function extractFirstMatch(text, regex) {
@@ -249,23 +275,22 @@ export function parseJobId(value) {
 }
 
 export function extractSearchCards(html, options = {}) {
-  const $ = load(html);
+  const documentNode = parseHtml(html);
   const cards = [];
   const baseUrl = options.baseUrl || "https://www.linkedin.com";
 
-  $(".base-search-card").each((index, element) => {
-    const root = $(element);
-    const url = normalizeJobUrl(root.find(".base-card__full-link").first().attr("href"), baseUrl);
-    const jobId = parseJobId(url || root.attr("data-entity-urn") || "");
-    const title = normalizeWhitespace(root.find(".base-search-card__title").first().text());
-    const company = normalizeWhitespace(root.find(".base-search-card__subtitle").first().text());
-    const location = normalizeWhitespace(root.find(".job-search-card__location").first().text());
-    const time = root.find("time").first();
-    const postedText = normalizeWhitespace(time.text());
-    const postedDate = time.attr("datetime") || null;
+  for (const [index, card] of selectNodes(documentNode, ".base-search-card").entries()) {
+    const url = normalizeJobUrl(getNodeAttribute(selectFirstNode(card, ".base-card__full-link"), "href"), baseUrl);
+    const jobId = parseJobId(url || getNodeAttribute(card, "data-entity-urn"));
+    const title = normalizeWhitespace(getNodeText(selectFirstNode(card, ".base-search-card__title")));
+    const company = normalizeWhitespace(getNodeText(selectFirstNode(card, ".base-search-card__subtitle")));
+    const location = normalizeWhitespace(getNodeText(selectFirstNode(card, ".job-search-card__location")));
+    const time = selectFirstNode(card, "time");
+    const postedText = normalizeWhitespace(getNodeText(time));
+    const postedDate = getNodeAttribute(time, "datetime") || null;
 
     if (!title || !url) {
-      return;
+      continue;
     }
 
     cards.push({
@@ -278,37 +303,40 @@ export function extractSearchCards(html, options = {}) {
       postedDate,
       postedText,
     });
-  });
+  }
 
   return cards;
 }
 
 export function extractJobDetails(html, options = {}) {
-  const $ = load(html);
+  const documentNode = parseHtml(html);
   const baseUrl = options.baseUrl || "https://www.linkedin.com";
   const sourceUrl = normalizeJobUrl(options.sourceUrl, baseUrl);
   const criteria = {};
 
-  $(".description__job-criteria-item").each((_, element) => {
-    const root = $(element);
-    const label = normalizeWhitespace(root.find(".description__job-criteria-subheader").first().text());
-    const value = normalizeWhitespace(root.find(".description__job-criteria-text").first().text());
+  for (const criteriaItem of selectNodes(documentNode, ".description__job-criteria-item")) {
+    const label = normalizeWhitespace(getNodeText(selectFirstNode(criteriaItem, ".description__job-criteria-subheader")));
+    const value = normalizeWhitespace(getNodeText(selectFirstNode(criteriaItem, ".description__job-criteria-text")));
     if (label && value) {
       criteria[label] = value;
     }
-  });
+  }
 
-  const canonicalUrl = normalizeJobUrl($("link[rel='canonical']").attr("href") || $("meta[property='og:url']").attr("content") || "", baseUrl) || sourceUrl;
-  const description = normalizeWhitespace($(".show-more-less-html__markup").first().text());
+  const canonicalUrl = normalizeJobUrl(
+    getNodeAttribute(selectFirstNode(documentNode, "link[rel='canonical']"), "href")
+      || getNodeAttribute(selectFirstNode(documentNode, "meta[property='og:url']"), "content"),
+    baseUrl,
+  ) || sourceUrl;
+  const description = normalizeWhitespace(getNodeText(selectFirstNode(documentNode, ".show-more-less-html__markup")));
 
   return {
     jobId: parseJobId(canonicalUrl || sourceUrl || ""),
     url: canonicalUrl,
-    title: normalizeWhitespace($(".topcard__title").first().text()),
-    company: normalizeWhitespace($(".topcard__org-name-link").first().text()),
-    location: normalizeWhitespace($(".topcard__flavor--bullet").first().text()),
-    postedText: normalizeWhitespace($(".posted-time-ago__text").first().text()) || normalizeWhitespace($("time").first().text()),
-    applicantCount: normalizeWhitespace($(".num-applicants__caption").first().text()) || normalizeWhitespace($(".num-applicants__figure figcaption").first().text()) || null,
+    title: normalizeWhitespace(getNodeText(selectFirstNode(documentNode, ".topcard__title"))),
+    company: normalizeWhitespace(getNodeText(selectFirstNode(documentNode, ".topcard__org-name-link"))),
+    location: normalizeWhitespace(getNodeText(selectFirstNode(documentNode, ".topcard__flavor--bullet"))),
+    postedText: normalizeWhitespace(getNodeText(selectFirstNode(documentNode, ".posted-time-ago__text"))) || normalizeWhitespace(getNodeText(selectFirstNode(documentNode, "time"))),
+    applicantCount: normalizeWhitespace(getNodeText(selectFirstNode(documentNode, ".num-applicants__caption"))) || normalizeWhitespace(getNodeText(selectFirstNode(documentNode, ".num-applicants__figure figcaption"))) || null,
     criteria,
     description,
     descriptionExcerpt: truncate(description, 500),
@@ -317,8 +345,8 @@ export function extractJobDetails(html, options = {}) {
 }
 
 function extractAuthenticatedShellJobDetails(html, options = {}) {
-  const $ = load(html);
-  const script = $("#rehydrate-data").html() || "";
+  const documentNode = parseHtml(html);
+  const script = getNodeHtml(selectFirstNode(documentNode, "#rehydrate-data"));
   if (!script) {
     return null;
   }
@@ -326,7 +354,7 @@ function extractAuthenticatedShellJobDetails(html, options = {}) {
 
   const baseUrl = options.baseUrl || "https://www.linkedin.com";
   const sourceUrl = normalizeJobUrl(options.sourceUrl, baseUrl);
-  const parsedTitle = parseLinkedInDocumentTitle($("title").first().text());
+  const parsedTitle = parseLinkedInDocumentTitle(getNodeText(selectFirstNode(documentNode, "title")));
   const jobId = extractFirstMatch(readableScript, /"jobId":"(\d+)"/);
   const company = extractFirstMatch(readableScript, /"companyName":"([^"]+)"/)
     || parsedTitle.company;
@@ -362,16 +390,16 @@ function extractAuthenticatedShellJobDetails(html, options = {}) {
 }
 
 function extractOffsiteJobDetails(html, options = {}) {
-  const $ = load(html);
+  const documentNode = parseHtml(html);
   const sourceUrl = options.sourceUrl || null;
-  const titleTag = normalizeWhitespace($("title").first().text())
-    || normalizeWhitespace($("meta[property='og:title']").attr("content"))
-    || normalizeWhitespace($("meta[name='title']").attr("content"));
+  const titleTag = normalizeWhitespace(getNodeText(selectFirstNode(documentNode, "title")))
+    || normalizeWhitespace(getNodeAttribute(selectFirstNode(documentNode, "meta[property='og:title']"), "content"))
+    || normalizeWhitespace(getNodeAttribute(selectFirstNode(documentNode, "meta[name='title']"), "content"));
   const parsedTitle = parseOffsiteDocumentTitle(titleTag);
   const metaDescription = normalizeWhitespace(decodeHtmlEntities(
-    $("meta[name='description']").attr("content")
-      || $("meta[property='og:description']").attr("content")
-      || $("meta[name='twitter:description']").attr("content")
+    getNodeAttribute(selectFirstNode(documentNode, "meta[name='description']"), "content")
+      || getNodeAttribute(selectFirstNode(documentNode, "meta[property='og:description']"), "content")
+      || getNodeAttribute(selectFirstNode(documentNode, "meta[name='twitter:description']"), "content")
       || "",
   ));
   const bodySelectors = [
@@ -384,7 +412,7 @@ function extractOffsiteJobDetails(html, options = {}) {
   ];
   let longestBody = "";
   for (const selector of bodySelectors) {
-    const text = normalizeWhitespace($(selector).first().text());
+    const text = normalizeWhitespace(getNodeText(selectFirstNode(documentNode, selector)));
     if (text.length > longestBody.length) {
       longestBody = text;
     }
