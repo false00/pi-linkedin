@@ -69,7 +69,6 @@
     "prepublishOnly": "npm test && npm pack --dry-run"
   },
   "dependencies": {
-    "@earendil-works/pi-coding-agent": "^0.84.1",
     "@sinclair/typebox": "^0.34.49",
     "cheerio-select": "^2.1.0",
     "domutils": "^3.2.2",
@@ -77,5 +76,10 @@
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    }
   }
 }

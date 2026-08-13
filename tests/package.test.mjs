@@ -17,7 +17,8 @@ test("package metadata exposes the Pi extension contract", () => {
   assert.equal(pkg.directories?.test, "tests");
   assert.equal(pkg.engines?.node, ">=22.19.0");
   assert.equal(pkg.peerDependencies?.["@earendil-works/pi-coding-agent"], "*");
-  assert.equal(pkg.dependencies?.["@earendil-works/pi-coding-agent"], "^0.84.1");
+  assert.equal(pkg.peerDependenciesMeta?.["@earendil-works/pi-coding-agent"]?.optional, true);
+  assert.equal(pkg.dependencies?.["@earendil-works/pi-coding-agent"], undefined);
   assert.equal(pkg.dependencies?.cheerio, undefined);
   assert.equal(pkg.dependencies?.["cheerio-select"], "^2.1.0");
   assert.equal(pkg.dependencies?.domutils, "^3.2.2");
@@ -31,6 +32,8 @@ test("package lockfile matches published dependency metadata", () => {
   assert.equal(rootPackage?.version, pkg.version);
   assert.equal(rootPackage?.engines?.node, pkg.engines?.node);
   assert.deepEqual(rootPackage?.dependencies, pkg.dependencies);
+  assert.deepEqual(rootPackage?.peerDependenciesMeta, pkg.peerDependenciesMeta);
+  assert.equal(lockfile.packages?.["node_modules/@earendil-works/pi-coding-agent"], undefined);
   assert.equal(lockfile.packages?.["node_modules/cheerio"], undefined);
   assert.equal(
     rootPackage?.peerDependencies?.["@earendil-works/pi-coding-agent"],

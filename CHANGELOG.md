@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ## 0.1.3 - 2026-08-13
 
 - Replaced Cheerio with the smaller HTML parser stack used for the package's existing CSS selectors, removing the vulnerable Cheerio-to-Undici dependency path from installed extensions.
-- Restored the broad Pi coding-agent peer range and added the supported Pi runtime as a direct dependency so this extension can coexist with other Pi packages that declare different peer ranges.
+- Restored the broad Pi coding-agent peer range and marked it optional so this extension can coexist with other Pi packages without npm installing an unused host runtime.
 - Added a CI gate that fails when the production dependency tree has known npm audit findings.
 
 ## 0.1.2 - 2026-08-13
