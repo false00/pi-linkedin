@@ -15,6 +15,20 @@ test("package metadata exposes the Pi extension contract", () => {
   assert.equal(pkg.bugs?.url, "https://github.com/false00/pi-linkedin/issues");
   assert.equal(pkg.directories?.doc, "docs");
   assert.equal(pkg.directories?.test, "tests");
+  assert.equal(pkg.engines?.node, ">=22.19.0");
+  assert.equal(pkg.peerDependencies?.["@earendil-works/pi-coding-agent"], ">=0.84.1");
+});
+
+test("package lockfile matches published dependency metadata", () => {
+  const lockfile = JSON.parse(fs.readFileSync(new URL("../package-lock.json", import.meta.url), "utf8"));
+  const rootPackage = lockfile.packages?.[""];
+
+  assert.equal(rootPackage?.version, pkg.version);
+  assert.equal(rootPackage?.engines?.node, pkg.engines?.node);
+  assert.equal(
+    rootPackage?.peerDependencies?.["@earendil-works/pi-coding-agent"],
+    pkg.peerDependencies?.["@earendil-works/pi-coding-agent"],
+  );
 });
 
 test("published files include docs and policy files", () => {

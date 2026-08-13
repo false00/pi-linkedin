@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 0.1.2 - 2026-08-13
+
+- Raised the Pi coding-agent peer dependency floor to `0.84.1` and refreshed locked transitive dependencies to address Dependabot advisories.
+- Updated GitHub Actions dependencies: checkout v7, setup-node v7, CodeQL v4, and dependency-review v5.
+
 ## 0.1.1 - 2026-07-21
 
 - Added optional LinkedIn session-cookie support through `LINKEDIN_LI_AT` or `LINKEDIN_COOKIE`.

@@ -162,8 +162,8 @@ If you are evaluating the package for production use, review:
 
 ### Requirements
 
-- Node.js 22+
-- A Pi runtime with extension support
+- Node.js 22.19+
+- A Pi runtime with extension support (`@earendil-works/pi-coding-agent` 0.84.1+)
 - Network access to `www.linkedin.com`
 
 ### Settings

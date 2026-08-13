@@ -28,7 +28,7 @@ The package exists to give the Pi coding agent a lightweight way to search Linke
 - The entrypoint must remain registered in `package.json` under `pi.extensions`.
 - The package currently exposes `linkedin_search_jobs` and `linkedin_get_job_details`.
 - The package also exposes the `/linkedin_auth` command for config reload and auth probing.
-- The supported Node.js floor is **22+**.
+- The supported Node.js floor is **22.19+**.
 
 ## Pi package conventions
 

@@ -1,6 +1,6 @@
 {
   "name": "@false00/pi-linkedin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Production-focused LinkedIn job search tools for the Pi coding agent — resume-driven search, ranking, and public job detail extraction from LinkedIn guest job pages",
   "type": "module",
   "main": "dist/index.js",
@@ -40,7 +40,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.19.0"
   },
   "author": "false00 <jortega@curl.red>",
   "repository": {
@@ -73,6 +73,6 @@
     "cheerio": "^1.1.2"
   },
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "*"
+    "@earendil-works/pi-coding-agent": ">=0.84.1"
   }
 }
