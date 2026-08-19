@@ -72,7 +72,7 @@
     "@sinclair/typebox": "^0.34.49",
     "cheerio-select": "^2.1.0",
     "domutils": "^3.2.2",
-    "htmlparser2": "^10.1.0"
+    "htmlparser2": "^12.0.0"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"
